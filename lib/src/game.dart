@@ -7,6 +7,7 @@ import 'blocks/blocks.dart';
 import 'board.dart';
 
 final class Game {
+  final VoidCallback onUpdate;
   late Board board;
   StreamSubscription? _subscription;
   late Block currentBlock; // текущий блок
@@ -19,7 +20,7 @@ final class Game {
   int speed = 500;
   int currentSpeed = 500;
   final Function(String scores) onGameOver;
-  Game({required this.onGameOver}) {
+  Game({required this.onGameOver, required this.onUpdate}) {
     currentBlock = getNewRandomBlock();
     nextBlock = getNewRandomBlock();
 
@@ -34,7 +35,7 @@ final class Game {
       pause: pause,
     );
   }
-  Future<void> start({required VoidCallback onUpdate}) async {
+  Future<void> start() async {
     // Запускаем игровой цикл
     while (!_isGameOver) {
       nextStep();
@@ -131,7 +132,7 @@ final class Game {
         restartGame: restartGame,
         pause: pause,
       );
-      start(onUpdate: () {}); //TODO:
+      start(); //TODO:
     }
   }
 

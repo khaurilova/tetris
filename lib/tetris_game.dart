@@ -87,13 +87,14 @@ class _TetrisGameState extends State<TetrisGame> {
   @override
   void initState() {
     super.initState();
-    game = Game(onGameOver: _showGameOverDialog);
-
-    game.start(
+    game = Game(
+      onGameOver: _showGameOverDialog,
       onUpdate: () {
         setState(() {});
       },
     );
+
+    game.start();
   }
 
   @override
