@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tetris/level_widget.dart';
+import 'package:tetris/src/blocks/blocks.dart';
 import '/src/board.dart';
 import '/src/game.dart';
 
@@ -43,6 +45,47 @@ class _GamePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+class _NextBlockPainter extends CustomPainter {
+  final Block nextBlock;
+  final double blockSize;
+
+  _NextBlockPainter(this.blockSize, {required this.nextBlock});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (nextBlock[i][j] != 0) {
+          paint.color = Colors.white;
+
+          Rect rect = Rect.fromLTWH(
+            j * blockSize,
+            i * blockSize,
+            blockSize,
+            blockSize,
+          );
+
+          canvas.drawRect(rect, paint);
+
+          // рамка
+          paint
+            ..style = PaintingStyle.stroke
+            ..color = Colors.black;
+
+          canvas.drawRect(rect, paint);
+
+          paint.style = PaintingStyle.fill;
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
 class TetrisGame extends StatefulWidget {
   const TetrisGame({super.key});
   @override
@@ -51,6 +94,8 @@ class TetrisGame extends StatefulWidget {
 
 class _TetrisGameState extends State<TetrisGame> {
   late Game game;
+  bool isGameStarted = false;
+
   // Метод для отображения диалогового окна при завершении игры
   // Принимает параметр scores в виде строки, содержащей набранные очки
   void _showGameOverDialog(String scores) {
@@ -66,7 +111,7 @@ class _TetrisGameState extends State<TetrisGame> {
         // Передаем контекст для правильного позиционирования диалога
         context: context,
         // Запрещаем закрытие диалога при щелчке вне его области
-        barrierDismissible: false,
+        barrierDismissible: true,
         // Функция построения содержимого диалога
         builder: (BuildContext context) {
           // Возвращаем виджет AlertDialog с информацией
@@ -77,7 +122,16 @@ class _TetrisGameState extends State<TetrisGame> {
             // Текст с количеством набранных очков
             content: Text('Your score: $scores'),
             // Список кнопок действий (пока пустой)
-            actions: const [],
+            actions: [
+              TextButton.icon(
+                icon: Icon(Icons.repeat),
+                onPressed: () {
+                  game.restartGame();
+                  Navigator.of(context).pop();
+                },
+                label: Text('Restart game'),
+              ),
+            ],
           );
         },
       );
@@ -94,42 +148,94 @@ class _TetrisGameState extends State<TetrisGame> {
       },
     );
 
+    // game.start();
+  }
+
+  void startGame() {
     game.start();
+    setState(() {
+      isGameStarted = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        // Обработка нажатий клавиш
-        // Обрабатываем как нажатие, так и удержание клавиши
-        if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          game.board.keyboardEventHandler(event.logicalKey.keyId);
-          setState(() {});
-          return KeyEventResult.handled;
-        }
-        // Если событие не обработано, возвращаем ignored
-        return KeyEventResult.ignored;
-      },
-      child: Align(
-        alignment: Alignment.center,
-        // Получаем размеры виджета
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final board = game.board.mainBoard;
-            // Вычисляем размер клетки поля
-            double blockSize = min(
-              constraints.maxWidth / board[0].length,
-              constraints.maxHeight / board.length,
-            );
-            return CustomPaint(
-              painter: _GamePainter(board, blockSize),
-              size: Size(board[0].length * blockSize, board.length * blockSize),
-            );
-          },
-        ),
-      ),
+    return Scaffold(
+      appBar: AppBar(title: Text('Score: ${game.score}')),
+      body: !isGameStarted
+          ? LevelWidget(
+              onLevelPicked: game.currentLevel,
+              startOfTheGame: startGame,
+            )
+          : Focus(
+              autofocus: true,
+              onKeyEvent: (FocusNode node, KeyEvent event) {
+                // Обработка нажатий клавиш
+                // Обрабатываем как нажатие, так и удержание клавиши
+                if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                  game.board.keyboardEventHandler(event.logicalKey.keyId);
+                  setState(() {});
+                  return KeyEventResult.handled;
+                }
+                // Если событие не обработано, возвращаем ignored
+                return KeyEventResult.ignored;
+              },
+              child: Stack(
+                children: [
+                  Positioned(
+                    child: Align(
+                      alignment: Alignment.center,
+                      // Получаем размеры виджета
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final board = game.board.mainBoard;
+                          // Вычисляем размер клетки поля
+                          double blockSize = min(
+                            constraints.maxWidth / board[0].length,
+                            constraints.maxHeight / board.length,
+                          );
+                          return CustomPaint(
+                            painter: _GamePainter(board, blockSize),
+                            size: Size(
+                              board[0].length * blockSize,
+                              board.length * blockSize,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 15,
+                    child: Container(
+                      color: Colors.black,
+                      width: 70,
+                      height: 70,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final board = game.board.mainBoard;
+                          // Вычисляем размер клетки поля
+                          double blockSize = min(
+                            constraints.maxWidth / 4,
+                            constraints.maxHeight / 4,
+                          );
+                          return CustomPaint(
+                            painter: _NextBlockPainter(
+                              blockSize,
+                              nextBlock: game.getNextBlock(),
+                            ),
+                            size: Size(
+                              board[0].length * blockSize,
+                              board.length * blockSize,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

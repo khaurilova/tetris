@@ -39,7 +39,7 @@ final class Game {
     // Запускаем игровой цикл
     while (!_isGameOver) {
       nextStep();
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: currentSpeed));
       onUpdate(); // Вызывается на каждый цикл игры
     }
     onGameOver(score.toString()); // Вызывается при завершении игры
@@ -83,15 +83,15 @@ final class Game {
 
   void currentLevel(int input) {
     switch (input) {
-      case 31:
+      case 1:
         level = 1;
         speed = 500;
         break;
-      case 32:
+      case 2:
         level = 3;
         speed = 300;
         break;
-      case 33:
+      case 3:
         level = 5;
         speed = 100;
         break;
@@ -114,26 +114,24 @@ final class Game {
   }
 
   Future<void> restartGame() async {
-    if (_isGameOver) {
-      _isGameOver = false;
-      score = 0;
-      level = 0;
-      speed = 500;
-      currentSpeed = 500;
-      // обнуляем набранные очки
-      // level = 0;
-      board = Board(
-        currentBlock: currentBlock,
-        newBlockFunc: newBlock,
-        nextBlockFunc: getNextBlock,
-        updateScore: updateScore,
-        updateBlock: updateBlock,
-        gameOver: gameOver,
-        restartGame: restartGame,
-        pause: pause,
-      );
-      start(); //TODO:
-    }
+    _isGameOver = false;
+    score = 0;
+    level = 0;
+    speed = 500;
+    currentSpeed = 500;
+    // обнуляем набранные очки
+    // level = 0;
+    board = Board(
+      currentBlock: currentBlock,
+      newBlockFunc: newBlock,
+      nextBlockFunc: getNextBlock,
+      updateScore: updateScore,
+      updateBlock: updateBlock,
+      gameOver: gameOver,
+      restartGame: restartGame,
+      pause: pause,
+    );
+    start(); //TODO:
   }
 
   // Метод обработки шага игрового цикла

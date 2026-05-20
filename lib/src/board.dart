@@ -61,6 +61,8 @@ class Board {
 
       case 112:
         pause();
+      case 113:
+        gameOver();
     }
   }
 
