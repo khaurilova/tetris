@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tetris/game_scores.dart';
 import '/src/board.dart';
 import '/src/game.dart';
 
@@ -87,48 +88,63 @@ class _TetrisGameState extends State<TetrisGame> {
   @override
   void initState() {
     super.initState();
-    game = Game(onGameOver: _showGameOverDialog);
-
-    game.start(
-      onUpdate: () {
-        setState(() {});
-      },
-    );
+    game = Game(onGameOver: (scores) {});
+    game.start();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        // Обработка нажатий клавиш
-        // Обрабатываем как нажатие, так и удержание клавиши
-        if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          game.board.keyboardEventHandler(event.logicalKey.keyId);
-          setState(() {});
-          return KeyEventResult.handled;
+    return ListenableBuilder(
+      // Передаем игру в качестве объекта, реализующего Listenable
+      listenable: game,
+      // Перестраиваем виджет при изменении состояния игры
+      builder: (context, _) {
+        if (game.isGameOver) {
+          return Center(
+            child: GameScores(
+              score: game.score,
+              onRestart: () {
+                // Перезапускаем игру
+                game.restartGame();
+              },
+            ),
+          );
         }
-        // Если событие не обработано, возвращаем ignored
-        return KeyEventResult.ignored;
-      },
-      child: Align(
-        alignment: Alignment.center,
-        // Получаем размеры виджета
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final board = game.board.mainBoard;
-            // Вычисляем размер клетки поля
-            double blockSize = min(
-              constraints.maxWidth / board[0].length,
-              constraints.maxHeight / board.length,
-            );
-            return CustomPaint(
-              painter: _GamePainter(board, blockSize),
-              size: Size(board[0].length * blockSize, board.length * blockSize),
-            );
+
+        return Focus(
+          autofocus: true,
+          onKeyEvent: (FocusNode node, KeyEvent event) {
+            if (event is KeyDownEvent || event is KeyRepeatEvent) {
+              game.board.keyboardEventHandler(event.logicalKey.keyId);
+              return KeyEventResult.handled;
+            }
+
+            // Если событие не обработано, возвращаем ignored
+            return KeyEventResult.ignored;
           },
-        ),
-      ),
+          child: Align(
+            alignment: Alignment.center,
+            // Получаем размеры виджета
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final board = game.board.mainBoard;
+                // Вычисляем размер клетки поля
+                double blockSize = min(
+                  constraints.maxWidth / board[0].length,
+                  constraints.maxHeight / board.length,
+                );
+                return CustomPaint(
+                  painter: _GamePainter(board, blockSize),
+                  size: Size(
+                    board[0].length * blockSize,
+                    board.length * blockSize,
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

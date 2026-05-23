@@ -3,12 +3,13 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 import 'blocks/blocks.dart';
 import 'board.dart';
 
-final class Game {
+final class Game extends ChangeNotifier {
   late Board board;
-  StreamSubscription? _subscription;
   late Block currentBlock; // текущий блок
   late Block nextBlock; // следующий блок
 
@@ -34,12 +35,11 @@ final class Game {
       pause: pause,
     );
   }
-  Future<void> start({required VoidCallback onUpdate}) async {
+  Future<void> start() async {
     // Запускаем игровой цикл
     while (!_isGameOver) {
       nextStep();
       await Future.delayed(const Duration(milliseconds: 500));
-      onUpdate(); // Вызывается на каждый цикл игры
     }
     onGameOver(score.toString()); // Вызывается при завершении игры
   }
@@ -51,12 +51,14 @@ final class Game {
   // Метод обновления блока фигуры
   void updateBlock(Block block) {
     currentBlock = block;
+    notifyListeners();
   }
 
   // Метод обновления счета
   void updateScore() {
     score += 10;
     updateLevel();
+    notifyListeners();
   }
 
   void updateLevel() {
@@ -78,7 +80,9 @@ final class Game {
 
   // Метод установки прослушивания нажатий клавиш
   // и передачи ASCII-кода нажатой клавиши на уровень ниже
-  void keyboardEventHandler() {}
+  void keyboardEventHandler() {
+    updateBlock(currentBlock);
+  }
 
   void currentLevel(int input) {
     switch (input) {
@@ -97,19 +101,11 @@ final class Game {
     }
   }
 
-  // Future<void> start() async {
-  //   // Запускаем игровой цикл
-  //   while (!_isGameOver) {
-  //     nextStep();
-  //     printScore();
-  //     await Future.delayed(const Duration(milliseconds: 500));
-  //   }
-  // }
-
   void printScore() {}
   bool get isGameOver => _isGameOver;
   void gameOver() {
     _isGameOver = true;
+    notifyListeners();
   }
 
   Future<void> restartGame() async {
@@ -131,7 +127,7 @@ final class Game {
         restartGame: restartGame,
         pause: pause,
       );
-      start(onUpdate: () {}); //TODO:
+      start(); //TODO:
     }
   }
 
@@ -148,6 +144,7 @@ final class Game {
         board.newBlock();
         board.drawBoard();
       }
+      notifyListeners();
     }
   }
 }

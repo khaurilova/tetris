@@ -37,7 +37,6 @@ class Board {
     initDrawMain();
   }
 
-  // обработка нажатия клавиш по их ASCII-коду
   void keyboardEventHandler(int key) async {
     var x = currentBlock.x;
     var y = currentBlock.y;
