@@ -2,7 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tetris/level_widget.dart';
+import 'package:tetris/main.dart';
 import 'package:tetris/src/blocks/blocks.dart';
+
+import 'package:tetris/game_scores.dart';
 import '/src/board.dart';
 import '/src/game.dart';
 
@@ -142,12 +145,16 @@ class _TetrisGameState extends State<TetrisGame> {
   void initState() {
     super.initState();
     game = Game(
-      onGameOver: _showGameOverDialog,
-      onUpdate: () {
-        setState(() {});
+      onGameOver: (scores) {
+        // Переход на экран окончания игры
+        // Передаем scores в аргументах
+        Navigator.pushReplacementNamed(
+          context,
+          GameRouter.gameOverRoute,
+          arguments: scores,
+        );
       },
     );
-
     // game.start();
   }
 
@@ -161,80 +168,101 @@ class _TetrisGameState extends State<TetrisGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Score: ${game.score}')),
+      appBar: AppBar(
+        title: ListenableBuilder(
+          listenable: game,
+          builder: (context, child) => Text('Score: ${game.score}'),
+        ),
+      ),
       body: !isGameStarted
           ? LevelWidget(
               onLevelPicked: game.currentLevel,
               startOfTheGame: startGame,
             )
-          : Focus(
-              autofocus: true,
-              onKeyEvent: (FocusNode node, KeyEvent event) {
-                // Обработка нажатий клавиш
-                // Обрабатываем как нажатие, так и удержание клавиши
-                if (event is KeyDownEvent || event is KeyRepeatEvent) {
-                  game.board.keyboardEventHandler(event.logicalKey.keyId);
-                  setState(() {});
-                  return KeyEventResult.handled;
-                }
-                // Если событие не обработано, возвращаем ignored
-                return KeyEventResult.ignored;
+          : ListenableBuilder(
+              // Передаем игру в качестве объекта, реализующего Listenable
+              listenable: game,
+              // Перестраиваем виджет при изменении состояния игры
+              builder: (context, _) {
+                return Focus(
+                  autofocus: true,
+                  onKeyEvent: (FocusNode node, KeyEvent event) {
+                    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                      game.board.keyboardEventHandler(event.logicalKey.keyId);
+                      return KeyEventResult.handled;
+                    }
+
+                    // Если событие не обработано, возвращаем ignored
+                    return KeyEventResult.ignored;
+                  },
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        child: Align(
+                          alignment: Alignment.center,
+                          // Получаем размеры виджета
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final board = game.board.mainBoard;
+                              // Вычисляем размер клетки поля
+                              double blockSize = min(
+                                constraints.maxWidth / board[0].length,
+                                constraints.maxHeight / board.length,
+                              );
+                              return Column(
+                                children: [
+                                  Expanded(
+                                    child: CustomPaint(
+                                      painter: _GamePainter(board, blockSize),
+                                      size: Size(
+                                        board[0].length * blockSize,
+                                        board.length * blockSize,
+                                      ),
+                                    ),
+                                  ),
+                                  // Отображение текущего счета
+                                  Text(
+                                    'Очки: ${game.score}',
+                                    style: TextStyle(fontSize: 24),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 15,
+                        child: Container(
+                          color: Colors.black,
+                          width: 70,
+                          height: 70,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final board = game.board.mainBoard;
+                              // Вычисляем размер клетки поля
+                              double blockSize = min(
+                                constraints.maxWidth / 4,
+                                constraints.maxHeight / 4,
+                              );
+                              return CustomPaint(
+                                painter: _NextBlockPainter(
+                                  blockSize,
+                                  nextBlock: game.getNextBlock(),
+                                ),
+                                size: Size(
+                                  board[0].length * blockSize,
+                                  board.length * blockSize,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
-              child: Stack(
-                children: [
-                  Positioned(
-                    child: Align(
-                      alignment: Alignment.center,
-                      // Получаем размеры виджета
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final board = game.board.mainBoard;
-                          // Вычисляем размер клетки поля
-                          double blockSize = min(
-                            constraints.maxWidth / board[0].length,
-                            constraints.maxHeight / board.length,
-                          );
-                          return CustomPaint(
-                            painter: _GamePainter(board, blockSize),
-                            size: Size(
-                              board[0].length * blockSize,
-                              board.length * blockSize,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: 15,
-                    child: Container(
-                      color: Colors.black,
-                      width: 70,
-                      height: 70,
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final board = game.board.mainBoard;
-                          // Вычисляем размер клетки поля
-                          double blockSize = min(
-                            constraints.maxWidth / 4,
-                            constraints.maxHeight / 4,
-                          );
-                          return CustomPaint(
-                            painter: _NextBlockPainter(
-                              blockSize,
-                              nextBlock: game.getNextBlock(),
-                            ),
-                            size: Size(
-                              board[0].length * blockSize,
-                              board.length * blockSize,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
     );
   }
