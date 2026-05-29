@@ -11,16 +11,21 @@ class GameScores extends StatelessWidget {
   const GameScores({super.key, required this.score, required this.onRestart});
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Заработанные очки: $score',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 20),
-        ElevatedButton(onPressed: onRestart, child: Text('Перезапустить игру')),
-      ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Заработанные очки: $score',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onRestart,
+            child: Text('Перезапустить игру'),
+          ),
+        ],
+      ),
     );
   }
 }
