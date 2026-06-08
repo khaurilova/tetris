@@ -72,6 +72,16 @@ final class ZBlock extends Block {
       ]);
 }
 
+final class DBlock extends Block {
+  DBlock()
+    : super([
+        [0, 1, 1, 0],
+        [0, 1, 0, 0],
+        [0, 1, 1, 0],
+        [0, 0, 0, 0],
+      ]);
+}
+
 final _defBlocks = [
   OBlock(),
   IBlock(),
@@ -107,8 +117,30 @@ final _defBlocks = [
     ..rotate()
     ..rotate()
     ..rotate(),
+  DBlock(),
+  DBlock()..rotate(),
+  DBlock()
+    ..rotate()
+    ..rotate(),
+  DBlock()
+    ..rotate()
+    ..rotate()
+    ..rotate(),
 ];
 
-Block getNewRandomBlock() {
-  return _defBlocks[Random().nextInt(_defBlocks.length)].copyWith();
+Block getNewRandomBlock(List<Block> selectedBlocks) {
+  return (selectedBlocks.isEmpty)
+      ? _defBlocks[Random().nextInt(_defBlocks.length)].copyWith()
+      : selectedBlocks[Random().nextInt(selectedBlocks.length)].copyWith();
 }
+
+final List<Block> availableBlocks = [
+  IBlock(),
+  OBlock(),
+  TBlock(),
+  LBlock(),
+  JBlock(),
+  SBlock(),
+  ZBlock(),
+  DBlock(),
+];

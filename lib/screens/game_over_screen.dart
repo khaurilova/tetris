@@ -14,7 +14,7 @@ class GameOverScreen extends StatelessWidget {
         score: scores,
         onRestart: () {
           // Переход на экран игры
-          Navigator.pushReplacementNamed(context, GameRouter.gameRoute);
+          Navigator.pushReplacementNamed(context, GameRouter.initialRoute);
         },
       ),
     );

@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -15,14 +14,21 @@ final class Game extends ChangeNotifier {
 
   bool _isGameOver = false;
   bool isPaused = false;
-  int level = 0;
+  int level = 1;
   int score = 0;
   int speed = 500;
   int currentSpeed = 500;
   final Function(String scores) onGameOver;
-  Game({required this.onGameOver}) {
-    currentBlock = getNewRandomBlock();
-    nextBlock = getNewRandomBlock();
+  final List<Block> selectedBlocks;
+
+  Game({
+    required this.onGameOver,
+    required this.level,
+    required this.selectedBlocks,
+  }) {
+    currentBlock = getNewRandomBlock(selectedBlocks);
+    nextBlock = getNewRandomBlock(selectedBlocks);
+    currentLevel(level);
 
     board = Board(
       currentBlock: currentBlock,
@@ -63,13 +69,13 @@ final class Game extends ChangeNotifier {
 
   void updateLevel() {
     level = score ~/ 50 + 1;
-    currentSpeed = max(100, speed - level * 50);
+    currentSpeed = max(100, currentSpeed - level * 50);
   }
 
   // Метод генерации новой фигуры
   Block newBlock() {
     currentBlock = nextBlock;
-    nextBlock = getNewRandomBlock();
+    nextBlock = getNewRandomBlock(selectedBlocks);
     return currentBlock;
   }
 
@@ -88,15 +94,15 @@ final class Game extends ChangeNotifier {
     switch (input) {
       case 1:
         level = 1;
-        speed = 500;
+        currentSpeed = 500;
         break;
       case 2:
         level = 3;
-        speed = 300;
+        currentSpeed = 300;
         break;
       case 3:
         level = 5;
-        speed = 100;
+        currentSpeed = 100;
         break;
     }
   }
@@ -126,7 +132,7 @@ final class Game extends ChangeNotifier {
         restartGame: restartGame,
         pause: pause,
       );
-      start(); //TODO:
+      start();
     }
   }
 
