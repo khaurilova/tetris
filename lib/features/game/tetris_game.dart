@@ -1,9 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tetris/game_scores.dart';
-import '/src/board.dart';
-import '/src/game.dart';
+import 'package:tetris/app/context_ext.dart';
+import 'package:tetris/app/utils.dart';
+import 'package:tetris/features/game/game_scores.dart';
+import 'package:tetris/main.dart';
+import 'src/board.dart';
+import 'src/game.dart';
 
 // Класс отрисовки игрового поля
 class _GamePainter extends CustomPainter {
@@ -88,7 +91,16 @@ class _TetrisGameState extends State<TetrisGame> {
   @override
   void initState() {
     super.initState();
-    game = Game(onGameOver: (scores) {});
+    game = Game(
+      onGameOver: (scores) {
+        // Переход на экран окончания игры
+        Navigator.pushReplacementNamed(context, GameRouter.gameOverRoute);
+        context.di.userCubit.setScores(
+          Utils.getUsername(context),
+          int.tryParse(scores.toString()) ?? 0,
+        );
+      },
+    );
     game.start();
   }
 
@@ -99,17 +111,17 @@ class _TetrisGameState extends State<TetrisGame> {
       listenable: game,
       // Перестраиваем виджет при изменении состояния игры
       builder: (context, _) {
-        if (game.isGameOver) {
-          return Center(
-            child: GameScores(
-              score: game.score,
-              onRestart: () {
-                // Перезапускаем игру
-                game.restartGame();
-              },
-            ),
-          );
-        }
+        // if (game.isGameOver) {
+        //   return Center(
+        //     child: GameScores(
+        //       score: game.score,
+        //       onRestart: () {
+        //         // Перезапускаем игру
+        //         game.restartGame();
+        //       },
+        //     ),
+        //   );
+        // }
 
         return Focus(
           autofocus: true,
@@ -133,12 +145,24 @@ class _TetrisGameState extends State<TetrisGame> {
                   constraints.maxWidth / board[0].length,
                   constraints.maxHeight / board.length,
                 );
-                return CustomPaint(
-                  painter: _GamePainter(board, blockSize),
-                  size: Size(
-                    board[0].length * blockSize,
-                    board.length * blockSize,
-                  ),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: CustomPaint(
+                        painter: _GamePainter(board, blockSize),
+                        size: Size(
+                          board[0].length * blockSize,
+                          board.length * blockSize,
+                        ),
+                      ),
+                    ),
+                    // Отображение текущего счета
+                    Text('Очки: ${game.score}', style: TextStyle(fontSize: 24)),
+                    Text(
+                      'Играет: ${Utils.getUsername(context)}',
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  ],
                 );
               },
             ),

@@ -1,4 +1,4 @@
-part of 'main.dart';
+part of '../main.dart';
 
 // Маршрут игры
 abstract final class GameRouter {
@@ -8,6 +8,12 @@ abstract final class GameRouter {
   static const String gameRoute = '/game';
   // Маршрут окончания игры
   static const String gameOverRoute = '/game_over';
+
+  // Маршрут таблицы лучших результатов
+  static const String leaderboardRoute = '/leaderboard';
+
+  // Маршрут пользователя
+  static const String userRoute = '/user';
   // Маршруты приложения. Объявляются приватными,
   // чтобы исключить доступ к ним вне навигатора
   static final Map<String, WidgetBuilder> _appRoutes = {
@@ -17,5 +23,9 @@ abstract final class GameRouter {
     gameRoute: (_) => const GameScreen(),
     // Экран окончания игры
     gameOverRoute: (_) => const GameOverScreen(),
+    // Экран таблицы лучших результатов
+    leaderboardRoute: (_) => const LeaderboardScreen(),
+    // Экран пользователя
+    userRoute: (_) => const UserScreen(),
   };
 }
