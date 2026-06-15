@@ -109,6 +109,16 @@ final _defBlocks = [
     ..rotate(),
 ];
 
-Block getNewRandomBlock() {
-  return _defBlocks[Random().nextInt(_defBlocks.length)].copyWith();
+Block getNewRandomBlock(List<Block> selectedBlocks) {
+  return selectedBlocks[Random().nextInt(selectedBlocks.length)].copyWith();
 }
+
+final List<Block> availableBlocks = [
+  IBlock(),
+  OBlock(),
+  TBlock(),
+  LBlock(),
+  JBlock(),
+  SBlock(),
+  ZBlock(),
+];

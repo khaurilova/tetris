@@ -2,6 +2,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:tetris/app/http/base_http_client.dart';
 import 'package:tetris/app/http/i_http_client.dart';
+import 'package:tetris/features/game_settings/domain/state/block_cubit.dart';
+import 'package:tetris/features/game_settings/domain/state/difficulty_cubit.dart';
 import 'package:tetris/features/leaderboard/data/leaderboard_repository.dart';
 import 'package:tetris/features/leaderboard/domain/i_leaderboard_repository.dart';
 import 'package:tetris/features/user/data/user_repository.dart';
@@ -17,6 +19,8 @@ final class DiContainer extends InheritedWidget {
     _userRepository = UserRepository(httpClient: _httpClient);
     // Инициализируем менеджер состояния пользователя
     userCubit = UserCubit(repository: _userRepository);
+    difficultyCubit = DifficultyCubit();
+    blockCubit = BlockCubit();
   }
   late final IHttpClient _httpClient;
   late final ILeaderboardRepository leaderRepository;
@@ -26,6 +30,8 @@ final class DiContainer extends InheritedWidget {
 
   /// Менеджер состояния пользователя
   late final UserCubit userCubit;
+  late final DifficultyCubit difficultyCubit;
+  late final BlockCubit blockCubit;
 
   /// Так как контейнер зависимостей нужен только для доступа
   /// к зависимостям, возвращаем false, чтобы виджеты-потомки

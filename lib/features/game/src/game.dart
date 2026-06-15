@@ -20,9 +20,18 @@ final class Game extends ChangeNotifier {
   int speed = 500;
   int currentSpeed = 500;
   final Function(String scores) onGameOver;
-  Game({required this.onGameOver}) {
-    currentBlock = getNewRandomBlock();
-    nextBlock = getNewRandomBlock();
+  final List<Block> selectedBlocks;
+  Game({
+    required this.selectedBlocks,
+    required this.onGameOver,
+    required int initialLevel,
+    required int initialSpeed,
+  }) {
+    level = initialLevel;
+    speed = initialSpeed;
+    currentSpeed = initialSpeed;
+    currentBlock = getNewRandomBlock(selectedBlocks);
+    nextBlock = getNewRandomBlock(selectedBlocks);
 
     board = Board(
       currentBlock: currentBlock,
@@ -39,7 +48,7 @@ final class Game extends ChangeNotifier {
     // Запускаем игровой цикл
     while (!_isGameOver) {
       nextStep();
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: currentSpeed));
     }
     onGameOver(score.toString()); // Вызывается при завершении игры
   }
@@ -69,7 +78,7 @@ final class Game extends ChangeNotifier {
   // Метод генерации новой фигуры
   Block newBlock() {
     currentBlock = nextBlock;
-    nextBlock = getNewRandomBlock();
+    nextBlock = getNewRandomBlock(selectedBlocks);
     return currentBlock;
   }
 
@@ -84,22 +93,22 @@ final class Game extends ChangeNotifier {
     updateBlock(currentBlock);
   }
 
-  void currentLevel(int input) {
-    switch (input) {
-      case 31:
-        level = 1;
-        speed = 500;
-        break;
-      case 32:
-        level = 3;
-        speed = 300;
-        break;
-      case 33:
-        level = 5;
-        speed = 100;
-        break;
-    }
-  }
+  // void currentLevel(int input) {
+  //   switch (input) {
+  //     case 31:
+  //       level = 1;
+  //       speed = 500;
+  //       break;
+  //     case 32:
+  //       level = 3;
+  //       speed = 300;
+  //       break;
+  //     case 33:
+  //       level = 5;
+  //       speed = 100;
+  //       break;
+  //   }
+  // }
 
   void printScore() {}
   bool get isGameOver => _isGameOver;

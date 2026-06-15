@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:tetris/app/context_ext.dart';
 import 'package:tetris/app/utils.dart';
 import 'package:tetris/features/game/game_scores.dart';
+import 'package:tetris/features/game/src/blocks/block.dart';
 import 'package:tetris/main.dart';
 import 'src/board.dart';
 import 'src/game.dart';
@@ -47,6 +48,46 @@ class _GamePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+class NextBlockPainter extends CustomPainter {
+  final Block nextBlock;
+  final double blockSize;
+
+  NextBlockPainter(this.blockSize, {required this.nextBlock});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (nextBlock[i][j] != 0) {
+          paint.color = Colors.white;
+
+          Rect rect = Rect.fromLTWH(
+            j * blockSize,
+            i * blockSize,
+            blockSize,
+            blockSize,
+          );
+          canvas.drawRect(rect, paint);
+
+          // рамка
+          paint
+            ..style = PaintingStyle.stroke
+            ..color = Colors.black;
+
+          canvas.drawRect(rect, paint);
+
+          paint.style = PaintingStyle.fill;
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
 class TetrisGame extends StatefulWidget {
   const TetrisGame({super.key});
   @override
@@ -55,6 +96,7 @@ class TetrisGame extends StatefulWidget {
 
 class _TetrisGameState extends State<TetrisGame> {
   late Game game;
+
   // Метод для отображения диалогового окна при завершении игры
   // Принимает параметр scores в виде строки, содержащей набранные очки
   void _showGameOverDialog(String scores) {
@@ -91,9 +133,13 @@ class _TetrisGameState extends State<TetrisGame> {
   @override
   void initState() {
     super.initState();
+    final difficulty =
+        context.di.difficultyCubit.stateNotifier.value.selectedDifficulty;
     game = Game(
+      selectedBlocks: context.di.blockCubit.stateNotifier.value.selectedBlocks,
+      initialLevel: difficulty.level,
+      initialSpeed: difficulty.speed,
       onGameOver: (scores) {
-        // Переход на экран окончания игры
         Navigator.pushReplacementNamed(context, GameRouter.gameOverRoute);
         context.di.userCubit.setScores(
           Utils.getUsername(context),
