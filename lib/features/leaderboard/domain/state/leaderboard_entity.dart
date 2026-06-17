@@ -16,6 +16,9 @@ class LeaderboardEntity with EqualsMixin {
     required this.username,
     required this.score,
   });
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'username': username, 'score': score};
+  }
 
   /// Переопределяем поля для сравнения объектов
   /// Используем для сравнения объектов в EqualsMixin

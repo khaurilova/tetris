@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:tetris/app/storage/i_storage_service.dart';
 import 'package:tetris/features/leaderboard/domain/i_leaderboard_repository.dart';
 
 import 'leaderboard_state.dart';
@@ -30,6 +33,7 @@ class LeaderboardCubit {
     try {
       emit(const LeaderboardLoading());
       final leaderboard = await repository.fetchLeaderboard();
+
       emit(LeaderboardSuccessState(leaderboard.toList()));
     } on Object catch (e, stackTrace) {
       emit(
