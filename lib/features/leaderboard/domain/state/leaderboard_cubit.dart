@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:tetris/app/storage/i_storage_service.dart';
+import 'package:tetris/app/storage/storage_service.dart';
 import 'package:tetris/features/leaderboard/domain/i_leaderboard_repository.dart';
 
 import 'leaderboard_state.dart';
@@ -10,13 +11,14 @@ import 'leaderboard_state.dart';
 /// таблицы лидеров. Сами состояния таблицы хранятся в ValueNotifier
 class LeaderboardCubit {
   final ILeaderboardRepository repository;
+  final IStorageService storageService;
 
   /// Состояние таблицы лидеров
   /// Используем ValueNotifier для отслеживания состояния
   final ValueNotifier<LeaderboardState> stateNotifier = ValueNotifier(
     LeaderboardInitState(),
   );
-  LeaderboardCubit({required this.repository});
+  LeaderboardCubit({required this.repository, required this.storageService});
 
   /// Установка текущего состояния
   void emit(LeaderboardState cubitState) {
@@ -36,11 +38,13 @@ class LeaderboardCubit {
 
       emit(LeaderboardSuccessState(leaderboard.toList()));
     } on Object catch (e, stackTrace) {
+      final cachedLeaderboard = await storageService.cacheParser();
       emit(
         LeaderboardErrorState(
           'Ошибка загрузки таблицы лидеров',
           error: e,
           stackTrace: stackTrace,
+          cachedLeaderboard: cachedLeaderboard,
         ),
       );
     }

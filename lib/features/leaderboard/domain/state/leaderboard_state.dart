@@ -33,7 +33,13 @@ final class LeaderboardErrorState extends LeaderboardState {
   final String message;
   final Object error;
   final StackTrace? stackTrace;
-  LeaderboardErrorState(this.message, {required this.error, this.stackTrace});
+  final Iterable<LeaderboardEntity> cachedLeaderboard;
+  LeaderboardErrorState(
+    this.message, {
+    required this.error,
+    this.stackTrace,
+    required this.cachedLeaderboard,
+  });
   @override
-  List<Object?> get fields => [message, error, stackTrace];
+  List<Object?> get fields => [message, error, stackTrace, cachedLeaderboard];
 }

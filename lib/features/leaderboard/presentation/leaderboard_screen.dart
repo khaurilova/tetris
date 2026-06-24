@@ -21,8 +21,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     // Инициализируем кубит и получаем таблицу
     // лидеров с помощью репозитория, который
     // получаем из контейнера зависимостей
-    leaderboardCubit = LeaderboardCubit(repository: context.di.leaderRepository)
-      ..fetchLeaderboard();
+    leaderboardCubit = context.di.leaderboardCubit..fetchLeaderboard();
   }
 
   @override

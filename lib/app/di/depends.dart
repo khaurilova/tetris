@@ -6,6 +6,7 @@ import 'package:tetris/features/game_settings/domain/state/block_cubit.dart';
 import 'package:tetris/features/game_settings/domain/state/difficulty_cubit.dart';
 import 'package:tetris/features/leaderboard/data/leaderboard_repository.dart';
 import 'package:tetris/features/leaderboard/domain/i_leaderboard_repository.dart';
+import 'package:tetris/features/leaderboard/domain/state/leaderboard_cubit.dart';
 import 'package:tetris/features/user/data/user_repository.dart';
 import 'package:tetris/features/user/domain/i_user_repository.dart';
 import 'package:tetris/features/user/domain/state/user_cubit.dart';
@@ -37,6 +38,10 @@ class Depends {
       httpClient: _httpClient,
       storageService: storageService,
     );
+    leaderboardCubit = LeaderboardCubit(
+      repository: leaderRepository,
+      storageService: storageService,
+    );
     // Инициализируем репозиторий пользователя
     // Передаем в репозиторий сервис для работы с локальным хранилищем
     _userRepository = UserRepository(
@@ -51,6 +56,7 @@ class Depends {
   }
 
   late final IStorageService storageService;
+  late final LeaderboardCubit leaderboardCubit;
 
   /// Интерфейс HTTP-клиента
   late final IHttpClient _httpClient;
