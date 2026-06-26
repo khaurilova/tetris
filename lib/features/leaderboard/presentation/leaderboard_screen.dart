@@ -62,9 +62,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           // Ошибка состояния
           // Здесь можно добавить обработку ошибок
           LeaderboardErrorState() => Center(
-            child: Text(
-              'Ошибка: ${state.message}',
-              style: const TextStyle(color: Colors.red),
+            child: Column(
+              children: [
+                Text(
+                  'Ошибка: ${state.message}',
+                  style: const TextStyle(color: Colors.red),
+                ),
+                Expanded(
+                  child: _ListRecords(
+                    state.cachedLeaderboard as List<LeaderboardEntity>,
+                  ),
+                ),
+              ],
             ),
           ),
         },
@@ -72,13 +81,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    // При завершении работы виджета освобождаем
-    // ресурсы кубита
-    leaderboardCubit.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // При завершении работы виджета освобождаем
+  //   // ресурсы кубита
+  //   leaderboardCubit.dispose();
+  //   super.dispose();
+  // }
 }
 
 /// Виджет для отображения списка записей
