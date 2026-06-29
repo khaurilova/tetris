@@ -23,6 +23,7 @@ import 'package:tetris/features/user/presentation/user_screen.dart';
 import 'package:tetris/features/game/game_over_screen.dart';
 import 'package:tetris/features/game/game_screen.dart';
 import 'package:tetris/features/main_menu/main_menu_screen.dart';
+import 'package:tetris/l10n/app_localizations.dart';
 part 'app/game_router.dart';
 
 void main() async {
@@ -35,7 +36,7 @@ void main() async {
     await depends.init();
     // При успешной инициализации зависимостей запускаем приложение
     // Передаем зависимости в контейнер зависимостей
-    runApp(_MyApp(depends: depends));
+    runApp(MyApp(depends: depends));
   } on Object catch (error, stackTrace) {
     // В случае ошибки при инициализации
     // зависимостей запускаем приложение с экраном ошибки
@@ -66,18 +67,53 @@ class AppError extends StatelessWidget {
   }
 }
 
-class _MyApp extends StatelessWidget {
-  const _MyApp({required this.depends});
+class MyApp extends StatefulWidget {
+  const MyApp({required this.depends});
 
   /// Передаем зависимости в приложение
   /// и используем их в контейнере зависимостей
   final Depends depends;
+
   @override
+  State<MyApp> createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  Locale _locale = const Locale('ru');
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale();
+  }
+
+  Future<void> _loadLocale() async {
+    final storage = widget.depends.storageService;
+    final localeCode = storage.getString('locale') ?? 'ru';
+    setState(() {
+      _locale = Locale(localeCode);
+    });
+  }
+
+  void setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+    _saveLocale(locale.languageCode);
+  }
+
+  Future<void> _saveLocale(String localeCode) async {
+    final storage = widget.depends.storageService;
+    await storage.setString('locale', localeCode);
+  }
+
   Widget build(BuildContext context) {
     return DiContainer(
-      depends: depends,
+      depends: widget.depends,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        locale: _locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         initialRoute: GameRouter.initialRoute,
         routes: GameRouter._appRoutes,
       ),
